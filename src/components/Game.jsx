@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { w3cwebsocket as W3CWebSocket } from "websocket";
 import config from '../config';
 
-const client = new W3CWebSocket(config.URL);
+const client = new W3CWebSocket(`https://tictactoe-brontend.glitch.me/`);
 
 
 const Game = () => {
