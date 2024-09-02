@@ -1,8 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect,useRef } from 'react';
 import { w3cwebsocket as W3CWebSocket } from "websocket";
-import config from '../config';
 
-const client = new W3CWebSocket(config.URL);
 
 
 const Game = () => {
@@ -11,9 +9,12 @@ const Game = () => {
     const [turn, setTurn] = useState('');
     const [board, setBoard] = useState(Array(9).fill(null));
     const [gameOver, setGameOver] = useState(false);
+    const clientRef = useRef('');
 
     useEffect(() => {
-        console.log(config)
+        const client = new W3CWebSocket(process.env.REACT_APP_BACKEND_URL);
+        clientRef.current=client;
+
         client.onmessage = (message) => {
             try {
                 const data = JSON.parse(message.data);
@@ -22,10 +23,9 @@ const Game = () => {
                     setPlayer(data.player);
                 }
                 else if (data.type === 'info') {
-                    setPlayer(data.msg)
+                    setPlayer(data.msg);
                     return
                 } else if (data.type === 'update') {
-                    console.log("update is called")
                     setTurn(data.turn);
                     setBoard(data.board);
                 } else if (data.type === 'end' && data.winner) {
@@ -38,6 +38,9 @@ const Game = () => {
                     setTimeout(() => {
                         window.location.reload()
                     }, 5000)
+                } else if(data.type === 'draw'){
+                    setWinStatus("Game Draw");
+                    setTurn('none');
                 }
 
             } catch (error) {
@@ -46,7 +49,7 @@ const Game = () => {
         };
 
         return () => {
-            if (client.readyState === WebSocket.OPEN) {
+            if (clientRef.readyState === WebSocket.OPEN) {
                 client.close();
             }
         };
@@ -57,7 +60,7 @@ const Game = () => {
             const newBoard = board.slice();
             newBoard[index] = turn;
             setBoard(newBoard);
-            client.send(JSON.stringify({ index: index, type: 'move', turn: turn }));
+            clientRef.current.send(JSON.stringify({ index: index, type: 'move', turn: turn }));
             setTurn(turn === 'X' ? 'O' : 'X');
         }
     };
@@ -79,15 +82,11 @@ const Game = () => {
             </div>
             <p className="mt-8 text-xl">
                 {
-                    turn === '' && player !== 'waiting for opponent' ? (
-                        <span>Please Reload...</span>
-                    ) : (
                         turn === '' ? (
                             <span className="font-bold">Current Turn: will be declared soon</span>
                         ) : (
                             <span className="font-bold">Current Turn: {turn}</span>
                         )
-                    )
                 }
             </p>
             <p className="mt-4 text-lg">
