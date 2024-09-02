@@ -1,11 +1,6 @@
 import React, { useState, useEffect,useRef } from 'react';
 import { w3cwebsocket as W3CWebSocket } from "websocket";
 
-<<<<<<< HEAD
-=======
-const client = new W3CWebSocket(`https://tictactoe-brontend.glitch.me/`);
->>>>>>> 3382559f4f70dd952d9c0c94f0be4b0bfd07b19e
-
 
 const Game = () => {
     const [gameWinStatus, setWinStatus] = useState('')
